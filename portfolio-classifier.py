@@ -429,13 +429,23 @@ class SecurityHoldingReport:
                     keys = [key for key in value if key not in non_categories]
                     
                     if percent_field != "":
-                        percentages = [float(value[key][percent_field]) for key in keys]
+                        if value[keys[0]][percent_field] is not None:
+                            percentages = [float(value[key][percent_field]) for key in keys]
+                        else:
+                            percentages =[]
                     else:
-                        percentages = [float(value[key]) for key in keys]
+                        if value[keys[0]] is not None:
+                            percentages = [float(value[key]) for key in keys]
+                        else:
+                            percentages = []
+                        
                     if grouping_name == 'Asset-Type':
-                        long_equity = (float(value.get('assetAllocEquity',{}).get('longAllocation',0)) +
+                        try:
+                            long_equity = (float(value.get('assetAllocEquity',{}).get('longAllocation',0)) +
                                       float(value.get('AssetAllocNonUSEquity',{}).get('longAllocation',0)) +           
                                       float(value.get('AssetAllocUSEquity',{}).get('longAllocation',0)))/100
+                        except TypeError:
+                            print(f"No information on {grouping_name}")
                 else:
                     # every match is a category
                     value = jsonpath.find(response)
@@ -449,7 +459,8 @@ class SecurityHoldingReport:
                     # capitalize first letter if not mapping
                     categories = [key[0].upper() + key[1:] for key in keys]
                 
-                self.calculate_grouping (categories, percentages, grouping_name, long_equity)
+                if percentages:
+                    self.calculate_grouping (categories, percentages, grouping_name, long_equity)
                 
             except json.JSONDecodeError:
                 print(f"secid {secid} not found in PortfolioSAL retrieving it from x-ray...")
