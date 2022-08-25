@@ -309,7 +309,7 @@ class Isin2secid:
             
     @staticmethod
     def get_secid(isin):
-        if Isin2secid.mapping.get(isin,"") == "":
+        if Isin2secid.mapping.get(isin,"-") == "-":
             url = f"https://www.morningstar.{DOMAIN}/en/util/SecuritySearch.ashx"
             payload = {
                 'q': isin,
@@ -326,8 +326,11 @@ class Isin2secid:
                 }
             resp = requests.post(url, data=payload, headers=headers)
             response = resp.content.decode('utf-8')
-            secid = re.search('\{"i":"([^"]+)"', response).group(1) 
-            Isin2secid.mapping[isin] = secid
+            if response:
+                secid = re.search('\{"i":"([^"]+)"', response).group(1) 
+                Isin2secid.mapping[isin] = secid
+            else:
+                secid = ''
         else:
             secid = Isin2secid.mapping[isin]
         return secid
@@ -362,8 +365,7 @@ class Holding(NamedTuple):
 
 class SecurityHoldingReport:
     def __init__ (self):
-        #self.security_isin = security_isin
-        self.security_holdings = []
+        self.secid=''
         pass
 
 
@@ -391,6 +393,10 @@ class SecurityHoldingReport:
     def load (self, isin, secid):
         if secid is None:
             secid = Isin2secid.get_secid(isin)
+        self.secid = secid
+        if self.secid == '':
+            print(f"isin {isin} not found in Morningstar...")
+            return
         bearer_token = self.get_bearer_token(secid)
         headers = {
             'accept': '*/*',
@@ -445,7 +451,7 @@ class SecurityHoldingReport:
                                       float(value.get('AssetAllocNonUSEquity',{}).get('longAllocation',0)) +           
                                       float(value.get('AssetAllocUSEquity',{}).get('longAllocation',0)))/100
                         except TypeError:
-                            print(f"No information on {grouping_name}")
+                            print(f"No information on {grouping_name} for {secid}")
                 else:
                     # every match is a category
                     value = jsonpath.find(response)
@@ -454,7 +460,10 @@ class SecurityHoldingReport:
 
                 # Map names if there is a map
                 if len(taxonomy.get('map',{})) != 0:
-                    categories = [taxonomy['map'][key] for key in keys]
+                    categories = [taxonomy['map'][key] for key in keys if key in taxonomy['map'].keys()]
+                    unmapped = [key for key in keys if key not in taxonomy['map'].keys()]
+                    if  unmapped:
+                        print(f"Categories not mapped: {unmapped} for {secid}")
                 else:
                     # capitalize first letter if not mapping
                     categories = [key[0].upper() + key[1:] for key in keys]
@@ -513,7 +522,7 @@ class PortfolioPerformanceFile:
         self.filepath = filepath
         self.pp_tree = ET.parse(filepath)
         self.pp = self.pp_tree.getroot()
-        self.securities = []
+        self.securities = None
 
     def get_security(self, security_xpath):
         """return a security object """
@@ -581,7 +590,7 @@ class PortfolioPerformanceFile:
         rank = 1
 
         for security in securities:
-            security_h = security.load_holdings()
+            security_h = security.holdings
             security_assignments = security_h.group_by_key(kind)
 
             
@@ -620,8 +629,8 @@ class PortfolioPerformanceFile:
         )
         self.pp.find('.//taxonomies').append(ET.fromstring(taxonomy_xml))
 
-    def write_xml(self):
-        with open('pp_classified.xml', 'wb') as f:
+    def write_xml(self, output_file):
+        with open(output_file, 'wb') as f:
             self.pp_tree.write(f, encoding="utf-8")
 
 
@@ -629,17 +638,20 @@ class PortfolioPerformanceFile:
         print (ET.tostring(self.pp, encoding="unicode"))
 
     def get_securities(self):
-        self.securities = []
-        sec_xpaths = []
-        for transaction in self.pp.findall('.//portfolio-transaction'): 
-            for child in transaction:
-                if child.tag == "security":
-                    sec_xpaths.append('.//'+ child.attrib["reference"].split('/')[-1])
-
-        for sec_xpath in list(set(sec_xpaths)):
-            security = self.get_security(sec_xpath)
-            if security is not None:
-                self.securities.append(security)
+        if self.securities is None:
+            self.securities = []
+            sec_xpaths = []
+            for transaction in self.pp.findall('.//portfolio-transaction'): 
+                for child in transaction:
+                    if child.tag == "security":
+                        sec_xpaths.append('.//'+ child.attrib["reference"].split('/')[-1])
+    
+            for sec_xpath in list(set(sec_xpaths)):
+                security = self.get_security(sec_xpath)
+                if security is not None:
+                    security_h = security.load_holdings()
+                    if security_h.secid !='':
+                        self.securities.append(security)
         return self.securities
 
 def print_class (grouped_holding):
@@ -650,14 +662,16 @@ def print_class (grouped_holding):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-    usage="%(prog)s <portfolio.xml> > autoclassified.portfolio.xml",
+    #usage="%(prog)s <input_file>  <output_file>",
     description='\r\n'.join(["reads a portfolio performance xml file and auto-classifies",
-                 "the securities in it by currency, country and sector weights",
+                 "the securities in it by asset-type, stock-style, sector, holdings, region and country weights",
                  "For each security, you need to have an ISIN"])
     )
 
     parser.add_argument('input_file', metavar='input_file', type=str,
                    help='path to unencrypted pp.xml file')
+    parser.add_argument('output_file', metavar='output_file', type=str, nargs='?',
+                   help='path to auto-classified output file', default='pp_classified.xml')
 
     args = parser.parse_args()
     
@@ -669,4 +683,4 @@ if __name__ == '__main__':
         for taxonomy in taxonomies:
             pp_file.add_taxonomy(taxonomy)
         Isin2secid.save_cache()
-        pp_file.write_xml()
+        pp_file.write_xml(args.output_file)
