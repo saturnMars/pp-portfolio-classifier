@@ -1,7 +1,7 @@
 # pp-portfolio-classifier
 
 
-Python script that automatically classifies Funds/ETFs managed in [Portfolio Performance](https://www.portfolio-performance.info/) files by the stock types, countries and industry sectors they are invested in. Furthermore it determines the Top 10 holdings of each fund. The classifier uses the information from morningstar as a data source for classification.
+Python script that automatically classifies Funds/ETFs managed in [Portfolio Performance](https://www.portfolio-performance.info/) files by the stock types, countries and industry sectors they are invested in. Furthermore it determines the Top 10 holdings of each fund. The classifier uses the information from morningstar as a data source for classification. It first tries to retrieve the information of the security from Morningstar itself and, if not found, it tries to use the x-ray service.
 Based on the script by fbuchinger
 
 ## Warnings & Known Issues
