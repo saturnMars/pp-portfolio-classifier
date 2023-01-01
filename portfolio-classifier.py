@@ -500,7 +500,7 @@ class SecurityHoldingReport:
                     if tr.text != '' and header.text not in non_categories:
                         categories.append(header.text)                                     
                         if len(tr.select("td")) > taxonomy['column']:
-                            percentages.append(float(tr.select("td")[taxonomy['column']].text.replace(",",".")))
+                            percentages.append(float('0' + tr.select("td")[taxonomy['column']].text.replace(",",".")))
                         else:
                             percentages.append(0.0)
                 if len(taxonomy.get('map2',{})) != 0:
