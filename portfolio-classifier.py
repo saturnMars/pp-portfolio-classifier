@@ -395,7 +395,7 @@ class SecurityHoldingReport:
             secid = Isin2secid.get_secid(isin)
         self.secid = secid
         if self.secid == '':
-            print(f"isin {isin} not found in Morningstar...")
+            print(f"isin {isin} not found in Morningstar, skipping it...")
             return
         bearer_token = self.get_bearer_token(secid)
         headers = {
@@ -423,7 +423,7 @@ class SecurityHoldingReport:
         for grouping_name, taxonomy in taxonomies.items():
             params['component'] = taxonomy['component']
             url = taxonomy['url'] + secid + "/data"
-            print(url)
+            # print(url)
             resp = requests.get(url, params=params, headers=headers)
             try:
                 response = resp.json()
@@ -482,7 +482,7 @@ class SecurityHoldingReport:
                               'Greater Europe', 'Americas', 'Greater Asia', 
                               ]
             url = "https://lt.morningstar.com/j2uwuwirpv/xray/default.aspx?LanguageId=en-EN&PortfolioType=2&SecurityTokenList=" + secid + "]2]0]FOESP%24%24ALL_1340&values=100"
-            print(url)
+            # print(url)
             resp = requests.get(url, headers=headers)
             soup = BeautifulSoup(resp.text, 'html.parser')
             for grouping_name, taxonomy in taxonomies.items():
@@ -528,16 +528,21 @@ class PortfolioPerformanceFile:
         """return a security object """
         security =  self.pp.findall(security_xpath)[0]
         if security is not None:
-            isin = security.find('isin').text
-            secid = security.find('secid')
-            if secid is not None:
-                secid = secid.text
-            return Security(
-                name = security.find('name').text,
-                ISIN = isin,
-                secid = secid,
-                UUID = security.find('uuid').text,
-            )
+            isin = security.find('isin') 
+            if isin is not None:
+                isin = isin.text
+                secid = security.find('secid')
+                if secid is not None:
+                    secid = secid.text
+                return Security(
+                    name = security.find('name').text,
+                    ISIN = isin,
+                    secid = secid,
+                    UUID = security.find('uuid').text,
+                )
+            else:
+                name = security.find('name').text
+                print(f"security '{name}' does not have isin, skipping it...")
         return None
 
     def get_security_xpath_by_uuid (self, uuid):
