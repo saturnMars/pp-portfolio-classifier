@@ -27,7 +27,8 @@ Steps:
 ## Gallery
 
 ### Autoclassified stock-style
-![Autoclassified Security types](docs/img/autoclassified-stock-style.png {:width="600px"})
+<img src="docs/img/autoclassified-stock-style.png" alt="Autoclassified Security types" width="600"/>
+
 
 
 ### Autoclassified Regions
