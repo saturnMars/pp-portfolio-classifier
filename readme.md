@@ -27,7 +27,7 @@ Steps:
 ## Gallery
 
 ### Autoclassified stock-style
-![Autoclassified Security types](docs/img/autoclassified-stock-style.png){:width="600px"}
+![Autoclassified Security types](docs/img/autoclassified-stock-style.png {:width="600px"})
 
 
 ### Autoclassified Regions
