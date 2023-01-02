@@ -32,8 +32,9 @@ Steps:
 
 
 ### Autoclassified Regions
-![Autoclassified Regions](docs/img/autoclassified-regions.png){:width="600px"}
+<img src="docs/img/autoclassified-regions.png" alt="Autoclassified Security types" width="600"/>
+
 
 
 ### Autoclassified Sectors
-![Autoclassified Sectors](docs/img/autoclassified-sectors.png){:width="600px"}
+<img src="docs/img/docs/img/autoclassified-sectors.png" alt="Autoclassified Security types" width="600"/>
