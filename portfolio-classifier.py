@@ -17,7 +17,7 @@ import json
 # Modify this to the morningstar domain where your securities can be found
 # e.g. es for spain, de for germany, fr for france...
 # this is only used to find the corresponding secid from the ISIN
-DOMAIN = 'es'
+DOMAIN = 'de'
 
 
 
@@ -500,7 +500,7 @@ class SecurityHoldingReport:
                     if tr.text != '' and header.text not in non_categories:
                         categories.append(header.text)                                     
                         if len(tr.select("td")) > taxonomy['column']:
-                            percentages.append(float('0' + tr.select("td")[taxonomy['column']].text.replace(",",".")))
+                            percentages.append(float('0' + tr.select("td")[taxonomy['column']].text.replace(",",".").replace("-","")))
                         else:
                             percentages.append(0.0)
                 if len(taxonomy.get('map2',{})) != 0:
