@@ -164,12 +164,18 @@ taxonomies = {'Asset-Type': {'url': 'https://www.emea-api.morningstar.com/sal/sa
                              'table': 0,
                              'column': 2,
                              'map':{"AssetAllocNonUSEquity":"Stocks", 
+                                    "CANAssetAllocCanEquity" : "Stocks", 
+                                    "CANAssetAllocUSEquity" : "Stocks",
+                                    "CANAssetAllocInternationalEquity": "Stocks",
                                     "AssetAllocUSEquity":"Stocks",
                                     "AssetAllocCash":"Cash",
+                                    "CANAssetAllocCash": "Stocks",
                                     "AssetAllocBond":"Bonds", 
+                                    "CANAssetAllocFixedIncome": "Bonds",
                                     "UK bond":"Bonds",
                                     "AssetAllocNotClassified":"Other",
                                     "AssetAllocOther":"Other",
+                                    "CANAssetAllocOther": "Other"
                                     }
                              },
               'Stock-style': {'url': 'https://www.emea-api.morningstar.com/sal/sal-service/etf/process/weighting/',
@@ -370,9 +376,9 @@ class SecurityHoldingReport:
         payload = {
             'FC': secid}
         response = requests.get(url, headers=headers, params=payload)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        script = soup.find('script', {'type':'text/javascript'})
-        return str(script).split('tokenMaaS:')[-1].split('}')[0].replace('"','').strip()        
+        token_regex = r"tokenMaaS\:\s\"(.+)\""
+        resultstringtoken = re.findall(token_regex, response.text)[0]
+        return resultstringtoken    
 
     def calculate_grouping(self, categories, percentages, grouping_name, long_equity):
         for category_name, percentage in zip(categories, percentages):
@@ -392,13 +398,14 @@ class SecurityHoldingReport:
             print(f"isin {isin} not found in Morningstar, skipping it...")
             return
         bearer_token = self.get_bearer_token(secid)
+        
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'fr-FR,fr;q=0.9,en-US;q=0.8,en;q=0.7',
-            'Authorization': 'Bearer %s' %bearer_token,
+            'Authorization': f'Bearer {bearer_token}',
             }
-        non_categories = ['avgMarketCap', 'portfolioDate', 'name', 'masterPortfolioId' ]
+        
         params = {
             'premiumNum': '10',
             'freeNum': '10',
@@ -413,12 +420,14 @@ class SecurityHoldingReport:
         for taxonomy in taxonomies:
             self.grouping[taxonomy] = defaultdict(float)
        
+        non_categories = ['avgMarketCap', 'portfolioDate', 'name', 'masterPortfolioId' ]
         json_not_found = False
         for grouping_name, taxonomy in taxonomies.items():
             params['component'] = taxonomy['component']
             url = taxonomy['url'] + secid + "/data"
             # print(url)
             resp = requests.get(url, params=params, headers=headers)
+
             try:
                 response = resp.json()
                 jsonpath = parse(taxonomy['jsonpath'])
@@ -466,7 +475,7 @@ class SecurityHoldingReport:
                     self.calculate_grouping (categories, percentages, grouping_name, long_equity)
                 
             except json.JSONDecodeError:
-                print(f"secid {secid} not found in PortfolioSAL retrieving it from x-ray...")
+                print(f"secid {secid} not found in PortfolioSAL ({resp.status_code}) retrieving it from x-ray...")
                 json_not_found = True
                 break
             
@@ -664,7 +673,7 @@ def print_class (grouped_holding):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
-    #usage="%(prog)s <input_file>  <output_file>",
+    #usage="%(prog)s <input_file> [<output_file>] [-d domain]",
     description='\r\n'.join(["reads a portfolio performance xml file and auto-classifies",
                  "the securities in it by asset-type, stock-style, sector, holdings, region and country weights",
                  "For each security, you need to have an ISIN"])
