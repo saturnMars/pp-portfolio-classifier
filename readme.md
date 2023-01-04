@@ -5,7 +5,8 @@ Python script that automatically classifies Funds/ETFs managed in [Portfolio Per
 Based on the script by fbuchinger
 
 ## Warnings & Known Issues
-- Experimental software - use with caution!  
+- Experimental software - use with caution! 
+- Check the [Portfolio Performance Forum thread](https://forum.portfolio-performance.info/t/automatic-import-of-classifications/14672) 
 
 ## Installation
 requires Python 3, git and Portfolio Performance.
