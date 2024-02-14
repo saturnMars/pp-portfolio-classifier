@@ -1,2 +1,4 @@
 *.py[cod]
 *.sqlite
+
+#app/_tmp/
