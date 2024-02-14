@@ -1,4 +1,4 @@
 *.py[cod]
 *.sqlite
 
-app/_tmp/
+_tmp/

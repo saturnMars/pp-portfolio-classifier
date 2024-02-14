@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     # Backup the file
     backup_fileName = path.splitext(file_name)[0] + '_backup.xml'
-    copyfile(input_path, path.join('app', '_tmp', backup_fileName))
+    copyfile(input_path, path.join('_tmp', backup_fileName))
 
     # Load the portfolio
     pp_file = PortfolioPerformanceFile(input_path)

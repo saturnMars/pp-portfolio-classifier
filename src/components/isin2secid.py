@@ -7,7 +7,7 @@ from os import makedirs, path
 
 from utils.CONSTANTS import DOMAIN
 
-cache_path = path.join('app', '_tmp')
+cache_path = '_tmp'
 requests_cache.install_cache(cache_name = path.join(cache_path, 'cache'), expire_after = 60 * 60 * 24 * 30) # cache downloaded files for a month
 requests_cache.remove_expired_responses()
 
