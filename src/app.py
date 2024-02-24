@@ -27,7 +27,7 @@ if __name__ == '__main__':
     for taxonomy in taxonomies:
         if taxonomy not in taxonomies_to_skip:
             pp_file.add_taxonomy(taxonomy)
-
+    
     # Save the ids
     Isin2secid.save_cache()
 

@@ -7,8 +7,9 @@ from os import makedirs, path
 
 from utils.CONSTANTS import DOMAIN
 
-cache_path = '_tmp'
-requests_cache.install_cache(cache_name = path.join(cache_path, 'cache'), expire_after = 60 * 60 * 24 * 30) # cache downloaded files for a month
+cache_path =  '_tmp'
+cache_days = 30 * 6
+requests_cache.install_cache(cache_name = path.join(cache_path, 'cache'), expire_after = (60 * 60 * 24) * cache_days) # cache files
 requests_cache.remove_expired_responses()
 
 class Isin2secid:
@@ -16,8 +17,9 @@ class Isin2secid:
     
     @staticmethod
     def load_cache():
-        if os.path.exists("isin2secid.json"):
-            with open("isin2secid.json", "r") as f:
+        if os.path.exists(path.join(cache_path, "isin2secid.json")):
+
+            with open(path.join(cache_path, "isin2secid.json"), "r") as f:
                 try:
                     Isin2secid.mapping = json.load(f)
                 except json.JSONDecodeError:
@@ -26,7 +28,7 @@ class Isin2secid:
         
     @staticmethod
     def save_cache():
-        with open("isin2secid.json", "w") as f:
+        with open(path.join(cache_path, "isin2secid.json"), "w") as f:
             json.dump(Isin2secid.mapping, f, indent=1, sort_keys=True)
             
     @staticmethod
@@ -50,8 +52,8 @@ class Isin2secid:
             resp = requests.post(url, data=payload, headers=headers)
             response = resp.content.decode('utf-8')
             if response:
-                secid = re.search('\{"i":"([^"]+)"', response).group(1) 
-                secid_type =response.split("|")[2].lower()
+                secid = re.search(r'{"i":"([^"]+)"', response).group(1) 
+                secid_type = response.split("|")[2].lower()
                 secid_type_domain = secid + "|" + secid_type + "|" + DOMAIN
                 Isin2secid.mapping[isin] = secid_type_domain
             else:
