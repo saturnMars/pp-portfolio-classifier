@@ -63,14 +63,15 @@ class PortfolioPerformanceFile:
         unique_categories = defaultdict(list)
         rank = 1
         fund_names = []
-        color = cycle(COLORS)
+
+        colors = cycle(COLORS)
         for security in securities:
             security_h = security.holdings
 
             fund_names.append({
-                'name':security.name, 
+                'name': security.name, 
                 "uuid": str(uuid.uuid4()), 
-                "color": next(color),
+                "color": next(colors),
                 'kind': taxonomyName
             })
 
@@ -98,10 +99,16 @@ class PortfolioPerformanceFile:
                 category = category.replace(prefix, '')
             category = category.replace(r'&amp;', '&').strip()
 
+            if taxonomyName == 'ESG Risk':
+                esg_colors = {'Negligible': '#2E7D32', 'Low' : '#8BC34A', 'Medium': '#FF9800',  'High': '#EF5350', 'Severe': '#C62828'}
+                cat_color = esg_colors[category]
+            else: 
+                cat_color = next(colors)
+
             categories.append({
                 "name": category,
                 "uuid": str(uuid.uuid4()),
-                "color": next(color),
+                "color": cat_color,
                 "assignments": assignments,
                 "weight": cat_weight
             })
@@ -117,7 +124,7 @@ class PortfolioPerformanceFile:
 
             parent_categories = []
             for macroName in macro_categories_names.keys():
-                parent_categories.append({'name':macroName,  "uuid": str(uuid.uuid4()), "color": next(color), 'kind': taxonomyName})
+                parent_categories.append({'name':macroName,  "uuid": str(uuid.uuid4()), "color": next(colors), 'kind': taxonomyName})
             parent_categories = None
         else:
             parent_categories = None

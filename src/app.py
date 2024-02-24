@@ -3,7 +3,8 @@ from components.isin2secid import Isin2secid
 from utils.taxonomies import taxonomies
 
 from shutil import copyfile
-from os import path
+from os import path, getcwd
+from win11toast import toast
 
 if __name__ == '__main__':
 
@@ -34,3 +35,9 @@ if __name__ == '__main__':
     # Write the enhanced portfolio
     output_path = path.join(data_folder, file_name)
     pp_file.write_xml(output_path)
+
+    # Window Message
+    toast('Taxonomy updated', f'The file "{file_name}" has been updated.', 
+          icon = path.join(getcwd(), 'src', 'utils', 'notification.ico'),
+          audio = {'silent': 'true'},
+    )
