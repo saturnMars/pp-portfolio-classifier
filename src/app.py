@@ -6,6 +6,8 @@ from shutil import copyfile
 from os import path, getcwd
 from win11toast import toast
 
+from multiprocessing import Process
+
 if __name__ == '__main__':
 
     # INPUT
@@ -14,7 +16,7 @@ if __name__ == '__main__':
     input_path = path.join(data_folder, file_name)
     
     # Load cache
-    Isin2secid.load_cache()
+    Process(target = Isin2secid.load_cache()).start()
 
     # Backup the file
     backup_fileName = path.splitext(file_name)[0] + '_backup.xml'
@@ -25,9 +27,9 @@ if __name__ == '__main__':
 
     # Add the taxonomies
     taxonomies_to_skip = ['Asset-Type', 'MSCI Regions']
-    for taxonomy in taxonomies:
-        if taxonomy not in taxonomies_to_skip:
-            pp_file.add_taxonomy(taxonomy)
+    processes = [Process(target = pp_file.add_taxonomy, args=(taxonomy,)) for taxonomy in taxonomies if taxonomy not in taxonomies_to_skip]
+    [process.start() for process in processes]
+    [process.join() for process in processes]
     
     # Save the ids
     Isin2secid.save_cache()
