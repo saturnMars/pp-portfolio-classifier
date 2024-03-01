@@ -1,6 +1,7 @@
 from components.classifier import PortfolioPerformanceFile
 from components.isin2secid import Isin2secid
 from utils.taxonomies import taxonomies
+from tqdm import tqdm
 
 from shutil import copyfile
 from os import path, getcwd
@@ -29,7 +30,7 @@ if __name__ == '__main__':
     taxonomies_to_skip = ['Asset-Type', 'MSCI Regions']
     processes = [Process(target = pp_file.add_taxonomy, args=(taxonomy,)) 
                  for taxonomy in taxonomies if taxonomy not in taxonomies_to_skip]
-    [process.start() for process in processes]
+    [process.start() for process in tqdm(processes)]
     [process.join() for process in processes]
     
     # Save the ids

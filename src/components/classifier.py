@@ -152,7 +152,7 @@ class PortfolioPerformanceFile:
             self.pp_tree.write(xml_file)
 
     def dump_xml(self):
-        print (ET.tostring(self.pp, encoding="unicode"))
+        print(ET.tostring(self.pp, encoding="unicode"))
 
     def get_securities(self):
         if self.securities is None:

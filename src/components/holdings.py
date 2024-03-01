@@ -4,6 +4,7 @@ from xml.sax.saxutils import escape
 from collections import defaultdict
 from jsonpath_ng import parse
 from datetime import datetime
+from tqdm import tqdm
 
 import numpy as np
 import json
@@ -20,9 +21,11 @@ class Security:
         self.__dict__.update(kwargs)
         self.holdings = []
         self.updateDate = None
+        self.verbose = False
 
     def load_holdings(self):
-        print('\n' + '-' * 100, "\n" + '-' * 100, "\n" +  '-' * 33 + f" {self.ticker.split('.')[0]}: {self.name} " + '-' * 33 , "\n" + '-' * 100, "\n" + '-' * 100)
+        if self.verbose:
+            print('\n' + '-' * 100, "\n" + '-' * 100, "\n" +  '-' * 33 + f" {self.ticker.split('.')[0]}: {self.name} " + '-' * 33 , "\n" + '-' * 100, "\n" + '-' * 100)
         if len(self.holdings) == 0:
             self.num_holdings = NUM_HOLDINGS_FOR_ETF
             self.holdings = SecurityHoldingReport(NUM_HOLDINGS_FOR_ETF)
@@ -50,6 +53,8 @@ class SecurityHoldingReport:
     def __init__ (self, num_holdings):
         self.secid=''
         self.num_holdings = num_holdings
+        
+        self.verbose = False
 
     def get_bearer_token(self, secid, domain):
         # the secid can change for retrieval purposes
@@ -115,7 +120,9 @@ class SecurityHoldingReport:
         non_categories = ['avgMarketCap', 'portfolioDate', 'name', 'masterPortfolioId' ]
         json_not_found = False
         for idk, (taxonomyName, taxonomy) in enumerate(taxonomies.items()):
-            print('\n' + "-" * 20, f'({idk + 1})', taxonomyName, f'({isin})', "-" * 20)
+            
+            if self.verbose:
+                print('\n' + "-" * 20, f'({idk + 1})', taxonomyName, f'({isin})', "-" * 20)
 
             params['component'] = taxonomy['component']
             url = taxonomy['url'] + secid + "/data"
@@ -200,7 +207,8 @@ class SecurityHoldingReport:
                 if percentages:
                     self.calculate_grouping(categories, percentages, taxonomyName, long_equity)
                 
-                print(f"--> OK: {len(categories)} categories found (e.g., {', '.join(categories[:3])}, ...).")
+                if self.verbose:
+                    print(f"--> OK: {len(categories)} categories found (e.g., {', '.join(categories[:3])}, ...).")
             except json.JSONDecodeError:
                 print(f"Problem with {taxonomyName.upper()} for secid {secid} in PortfolioSAL...")
                 json_not_found = True
