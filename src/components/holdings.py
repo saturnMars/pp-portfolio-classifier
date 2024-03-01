@@ -19,6 +19,7 @@ class Security:
     def __init__ (self, **kwargs):
         self.__dict__.update(kwargs)
         self.holdings = []
+        self.updateDate = None
 
     def load_holdings(self):
         print('\n' + '-' * 100, "\n" + '-' * 100, "\n" +  '-' * 33 + f" {self.ticker.split('.')[0]}: {self.name} " + '-' * 33 , "\n" + '-' * 100, "\n" + '-' * 100)
@@ -26,7 +27,11 @@ class Security:
             self.num_holdings = NUM_HOLDINGS_FOR_ETF
             self.holdings = SecurityHoldingReport(NUM_HOLDINGS_FOR_ETF)
             self.holdings.load(isin = self.ISIN, secid = self.secid)
+            self.updateDate = self.holdings.updateDate
         return self.holdings
+    
+    def get_updateDate(self):
+        return self.updateDate
 
 class SecurityHolding(NamedTuple):
     name: str
@@ -45,7 +50,6 @@ class SecurityHoldingReport:
     def __init__ (self, num_holdings):
         self.secid=''
         self.num_holdings = num_holdings
-        #pass
 
     def get_bearer_token(self, secid, domain):
         # the secid can change for retrieval purposes
@@ -127,8 +131,7 @@ class SecurityHoldingReport:
                 response = resp.json()
 
                 if 'fundPortfolio' in response.keys():
-                    updateDate = response['fundPortfolio']['portfolioDate'].split('T')[0]
-                    print("Updated:", updateDate)    
+                    self.updateDate = response['fundPortfolio']['portfolioDate'].split('T')[0] 
                 
                 #with open('app/_tmp/raw_response.json', 'w+') as jFile:
                 #    json.dump(response, jFile)

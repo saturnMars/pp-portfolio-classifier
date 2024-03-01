@@ -23,6 +23,7 @@ class PortfolioPerformanceFile:
         self.pp_tree = ET.parse(filepath)
         self.pp = self.pp_tree.getroot()
         self.securities = None
+        self.updateDate = None
 
     def get_security(self, security_xpath):
         """return a security object """
@@ -164,7 +165,8 @@ class PortfolioPerformanceFile:
     
             for sec_xpath in list(set(sec_xpaths)):
                 security = self.get_security(sec_xpath)
-
+                self.updateDate = security.get_updateDate()
+                
                 if security is not None:
                     security_h = security.load_holdings()
                     if security_h.secid !='':
@@ -172,6 +174,9 @@ class PortfolioPerformanceFile:
         self.securities = sorted(self.securities, key = lambda security: security.ticker, reverse=True)
 
         return self.securities
+    
+    def get_updateDate(self):
+        return self.updateDate
 
 def print_class(grouped_holding):
     for key, value in sorted(grouped_holding.items(), reverse=True):

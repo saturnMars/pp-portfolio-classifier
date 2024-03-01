@@ -27,7 +27,8 @@ if __name__ == '__main__':
 
     # Add the taxonomies
     taxonomies_to_skip = ['Asset-Type', 'MSCI Regions']
-    processes = [Process(target = pp_file.add_taxonomy, args=(taxonomy,)) for taxonomy in taxonomies if taxonomy not in taxonomies_to_skip]
+    processes = [Process(target = pp_file.add_taxonomy, args=(taxonomy,)) 
+                 for taxonomy in taxonomies if taxonomy not in taxonomies_to_skip]
     [process.start() for process in processes]
     [process.join() for process in processes]
     
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     pp_file.write_xml(output_path)
 
     # Window Message
-    toast('Taxonomy updated', f'The file "{file_name}" has been updated.', 
+    toast('Taxonomy updated', f'The file "{file_name}" is now updated up to date', 
           icon = path.join(getcwd(), 'src', 'utils', 'notification.ico'),
           audio = {'silent': 'true'},
     )
