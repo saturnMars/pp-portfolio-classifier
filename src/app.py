@@ -25,12 +25,13 @@ if __name__ == '__main__':
 
     # Load the portfolio
     pp_file = PortfolioPerformanceFile(input_path)
+    print(f'\nPortfolio Performance file ({file_name}) has been loaded.\n')
 
     # Add the taxonomies
     taxonomies_to_skip = ['Asset-Type', 'MSCI Regions']
     processes = [Process(target = pp_file.add_taxonomy, args=(taxonomy,)) 
                  for taxonomy in taxonomies if taxonomy not in taxonomies_to_skip]
-    [process.start() for process in tqdm(processes)]
+    [process.start() for process in tqdm(processes, desc='Adding taxonomies')]
     [process.join() for process in processes]
     
     # Save the ids

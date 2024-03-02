@@ -1,0 +1,2 @@
+cd C:\Users\marco\Documents\Finanza personale\Investimenti\Apps\ETF analyzers\Holding classifier for Portfolio
+py src/app.py & start "" "C:\Users\marco\AppData\Local\Programs\PortfolioPerformance\PortfolioPerformance.exe"
