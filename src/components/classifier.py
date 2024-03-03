@@ -5,6 +5,7 @@ from itertools import cycle
 from typing import NamedTuple
 from collections import defaultdict
 from numpy import floor
+import logging
 
 # LOCAL IMPORT
 from utils.CONSTANTS import COLORS
@@ -49,9 +50,9 @@ class PortfolioPerformanceFile:
             if sec_uuid == uuid:
                 return f"../../../../../../../../securities/security[{idx + 1}]"
 
-    def add_taxonomy (self, taxonomyName, overwrite = False):
+    def add_taxonomy(self, taxonomyName, overwrite = False):
         securities = self.get_securities()
-
+        
         # Remove the existing taxonomy
         pos_taxonomy = -1
         taxonomies = self.pp.find('taxonomies')
@@ -165,7 +166,6 @@ class PortfolioPerformanceFile:
     
             for sec_xpath in list(set(sec_xpaths)):
                 security = self.get_security(sec_xpath)
-                self.updateDate = security.get_updateDate()
                 
                 if security is not None:
                     security_h = security.load_holdings()

@@ -3,24 +3,22 @@ from typing import NamedTuple
 from xml.sax.saxutils import escape
 from collections import defaultdict
 from jsonpath_ng import parse
-from datetime import datetime
-from tqdm import tqdm
 
 import numpy as np
 import json
 import requests
 import re
 
+# Local imports
 from utils.CONSTANTS import DOMAIN, NUM_HOLDINGS_FOR_ETF, NUM_VISUALISE_HOLDINGS
 from components.isin2secid import Isin2secid
 from utils.taxonomies import taxonomies
 
 class Security:
- 
+
     def __init__ (self, **kwargs):
         self.__dict__.update(kwargs)
         self.holdings = []
-        self.updateDate = None
         self.verbose = False
 
     def load_holdings(self):
@@ -30,11 +28,7 @@ class Security:
             self.num_holdings = NUM_HOLDINGS_FOR_ETF
             self.holdings = SecurityHoldingReport(NUM_HOLDINGS_FOR_ETF)
             self.holdings.load(isin = self.ISIN, secid = self.secid)
-            self.updateDate = self.holdings.updateDate
         return self.holdings
-    
-    def get_updateDate(self):
-        return self.updateDate
 
 class SecurityHolding(NamedTuple):
     name: str
@@ -53,7 +47,6 @@ class SecurityHoldingReport:
     def __init__ (self, num_holdings):
         self.secid=''
         self.num_holdings = num_holdings
-        
         self.verbose = False
 
     def get_bearer_token(self, secid, domain):
@@ -138,7 +131,8 @@ class SecurityHoldingReport:
                 response = resp.json()
 
                 if 'fundPortfolio' in response.keys():
-                    self.updateDate = response['fundPortfolio']['portfolioDate'].split('T')[0] 
+                    updateDate = response['fundPortfolio']['portfolioDate'].split('T')[0]
+                    #print(f"{isin}: Update date for {taxonomyName} is {updateDate}")
                 
                 #with open('app/_tmp/raw_response.json', 'w+') as jFile:
                 #    json.dump(response, jFile)
