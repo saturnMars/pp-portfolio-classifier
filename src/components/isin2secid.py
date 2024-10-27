@@ -10,7 +10,7 @@ from utils.CONSTANTS import DOMAIN
 cache_path =  '_tmp'
 cache_days = 30 * 6
 requests_cache.install_cache(cache_name = path.join(cache_path, 'cache'), expire_after = (60 * 60 * 24) * cache_days) # cache files
-requests_cache.remove_expired_responses()
+#requests_cache.remove_expired_responses()
 
 class Isin2secid:
     mapping = dict()
